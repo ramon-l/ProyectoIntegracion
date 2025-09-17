@@ -1,0 +1,31 @@
+**Configuraciones de backend**
+
+1. Descargar el .zip o clonar el repositorio
+
+2. Instalar dependencias con el comando\
+`npm install`
+
+3. En la raíz del proyecto backend crear manualmente un archivo .env y dentro del arhivo realiza lo siguiente:
+* Ingresa la siguiente configuración de conexión al backend. [cambiar usuario y password por la conexión a tu backend]\
+`DATABASE_URL="postgresql://usuario:password@localhost:5432/db_user"`
+* Ingresar la siguiente configuración de clave secreta para cifrar las contraseñas
+`JWT_SECRET="reemplaza este contenido por tu clave secreta"`
+
+4. Ejecutar migraciones de Prisma para crear tablas:\
+`npx prisma migrate dev --name init`
+
+5. Levantar el servidor:\
+`npm run dev`
+
+**Configuraciones de frontend**
+
+1. Descargar el .zip o clonar el repositorio
+
+2. Se recomienda utilizar el IDE `vscode` e instalar la extensión `liveServer`
+
+3. Una vez instalado hacer click derecho sobre el archivo `index.html` ubicado en `src-> html -> index.html` y seleccionar la opción `Open with Live Server` para levantar el proyecto y probar las funcionalidades.
+
+**Funcionalidades disponibles**
+login
+crear, modificar, eliminar una cuenta deusuario
+ver datos de enlace externo, clima en la sección de reservas
