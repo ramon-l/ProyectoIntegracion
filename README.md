@@ -33,12 +33,39 @@
 
 **Funcionalidades disponibles** 
 * login \
-POST http://localhost:3000/api/login
+POST http://localhost:3000/api/login \
+ Body:
+   ``` 
+        {
+            "correo": "juan@gmail.com",
+            "password":"1"
+        }
+   ```
 * crear, modificar, eliminar y obtener datos de una cuenta de usuario \
 GET http://localhost:3000/api/usuarios/:id \
 POST http://localhost:3000/api/usuarios \
+  Body:
+   ``` 
+        {
+            "nombre": "juan",
+            "apellido": "perez",
+            "correo": "juan@gmail.com",
+            "telefono": "123456",
+            "password":"1",
+            "rolId": 1  // cliente
+        }
+   ```
 PUT http://localhost:3000/api/usuarios/:id \
-DELETE http://localhost:3000/api/usuarios/:id
+  Body: 
+   ``` 
+        {
+            "nombre": "juan",
+            "apellido": "perez",
+            "telefono": "123456"
+        }
+   ```
+ DELETE http://localhost:3000/api/usuarios/:id
+
 
 * ver datos de enlace externo, clima en la sección de reservas \
 GET http://localhost:3000/api/clima?ciudad=ASUNCION&fecha=2025-09-17
