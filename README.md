@@ -17,6 +17,12 @@
 5. Levantar el servidor: \
 `npm run dev`
 
+6. Ejecutar el siguiente insert, para generar los primeros datos de roles:
+    ```
+    INSERT INTO public."Roles" (nombre, descripcion)
+    VALUES ('cliente2', 'es un cliente'), ('admin2', 'es un admin'); 
+    ```
+
 **Configuraciones de frontend**
 
 1. Descargar el .zip o clonar el repositorio
