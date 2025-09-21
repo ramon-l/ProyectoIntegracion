@@ -1,3 +1,5 @@
+
+
 const Config = {
   API_BASE_URL: 'http://localhost:3000/api',
   ENDPOINTS: {
@@ -34,6 +36,9 @@ const Config = {
   },
 
   saveToken(token) {
+    const decoded = jwt_decode(token);
+    this.setUserId(decoded.userId);
+    this.setUserRolId(decoded.userRolId);
     localStorage.setItem('token', token);
   },
 
@@ -60,7 +65,7 @@ const Config = {
   setUserRolId(id) {
     localStorage.setItem('userRolId', id);
   },
-  
+
   isLoggedIn() {
     return !!this.getToken();
   },

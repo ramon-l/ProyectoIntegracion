@@ -31,13 +31,13 @@ export const login = async (req: Request, res: Response, next:
 
         // 3. Crear token
         const token = jwt.sign(
-            { userId: user.id, correo: user.correo },
+            { userId: user.id, correo: user.correo, userRolId: user.rolId},
             SECRET_KEY,
             { expiresIn: "1h" }
         );
 
         res.json({
-            message: "Login exitoso", token, userId: user.id, userRolId: user.rolId
+            message: "Login exitoso", token
         });
     } catch (err) {
         res.status(500).json({ error: "Error en el login" });
