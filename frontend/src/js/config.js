@@ -39,6 +39,7 @@ const Config = {
     const decoded = jwt_decode(token);
     this.setUserId(decoded.userId);
     this.setUserRolId(decoded.userRolId);
+    this.setIsAdmin(decoded.setUserId);
     localStorage.setItem('token', token);
   },
 
@@ -60,6 +61,15 @@ const Config = {
 
   getUserRolId() {
     return localStorage.getItem('userRolId');
+  },
+
+  setIsAdmin(rolId) {
+    const bool = rolId==2;
+    localStorage.setItem('isAdmin', bool);
+  },
+
+  isAdmin() {
+    return localStorage.getItem('isAdmin');
   },
 
   setUserRolId(id) {

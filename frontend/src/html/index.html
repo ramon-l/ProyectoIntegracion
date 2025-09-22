@@ -133,10 +133,10 @@
       <h2 class="mb-4">Mesa Libre</h2>
       <div>
         <ul class="nav nav-tabs " style="background-color: #e3f2fd;" data-bs-theme="light" id="myTab">
-          <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#usuarios">Mis datos</a></li>
-          <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#reserva">Reservas</a></li>
+          <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#usuarios">Mis datos</a></li>
+          <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#reserva">Reservas</a></li>
           <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#mesas">Mesas</a></li>
-          <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#roles">Roles</a></li>
+          <!--li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#roles">Roles</a></li-->
           <li class="nav-item ms-md-auto">
             <form id="logout-form"><button class="nav-link" type="submit">Cerrar Sesión</button>
             </form>
@@ -147,112 +147,93 @@
 
     <div id="nav-tabs-seccion" class="tab-content mt-3">
       <!-- Seccion de Reservas -->
-      <div id="reserva" class="tab-pane fade ">
-        <form id="reserva-form" class="card p-3 mt-5">
-          <button type="submit" class="btn btn-outline-success d-grid fw-bold gap-2 mx-auto">Obtener datos del
-            clima</button>
-          <span id="span-clima"></span>
-        </form>
-        <h3></h3>
-        <div class="card-body">
-          <!-- Mostrar reservas-->
-          <div id="mostrar-reserva">
-            <div class="table-responsive">
-              <table class="table table-bordered table-striped table-hover rounded-5">
-                <thead class="ms-2 text-center">
-                  <tr>
-                    <th>Fecha Reserva</th>
-                    <th>Hora Inicio</th>
-                    <th>Hora Fin</th>
-                    <th>Estado</th>
-                    <th>Cantidad</th>
-                    <th>Usuario</th>
-                    <th>Accion</th>
-                  </tr>
-                </thead>
-                <tbody id="reservas-body"></tbody>
-              </table>
+      <div id="reserva" class="tab-pane fade show active">
+        <div class="card p-3">
+          <div class="card-body">
+            <div class="modal fade" id="climaModal" tabindex="-1" aria-labelledby="climaModal" aria-hidden="true">
+              <div class="modal-dialog">
+                <div class="modal-content">
+                  <div class="modal-header">
+                    <h1 class="modal-title fs-5" id="climaModal">Consultar clima</h1>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                  </div>
+                  <div class="modal-body">
+                    <div class="mb-3">
+                      <label for="selectCiudades" class="col-form-label">Ciudad:</label>
+                      <select id="selectCiudades" class="form-select form-control"
+                        aria-label="Floating label select example" required>
+                      </select>
+                    </div>
+                    <div class="mb-3">
+                      <label for="fechaClima" class="col-form-label">fecha:</label>
+                      <input type="date" class="form-control" id="fechaClima" required></input>
+                    </div>
+                    <p></p>
+                    <div id="span-clima"></div>
+                    <p></p>
+                  </div>
+                  <div class="modal-footer">
+                    <button type="button" id="consultar-clima-btn" class="btn btn-outline-primary">Consultar</button>
+                    <button type="button" class="btn btn-outline-dark" data-bs-dismiss="modal">Cerrar</button>
+                  </div>
+                </div>
+              </div>
             </div>
+            <!-- Mostrar reservas-->
+            <div id="mostrar-reserva">
+              <div class="table-responsive">
+                <table class="table table-bordered table-striped table-hover rounded-5">
+                  <thead class="ms-2 text-center" id="reservas-head"></thead>
+                  <tbody id="reservas-body"></tbody>
+                </table>
+              </div>
+            </div>
+            <!-- Modificar reserva-->
+            <div id="modificar-reserva" style="display: none;">
+              <form id="reserva-modificar-form">
+              </form>
+            </div>
+            <!-- Crear reserva-->
+            <div id="crear-reserva" style="display: none;">
+              <form id="reserva-crear-form">
+                <div class="mb-3">
+                  <label for="mesaCrearReserva" class="col-form-label">Mesa:</label>
+                  <select id="mesaCrearReserva" class="form-select form-control"
+                    aria-label="Floating label select example" required>
+                  </select>
+                </div>
+                <div class="mb-3"><input type="date" id="fechaReserva" class="form-control" required></div>
+                <div class="mb-3"><input type="time" id="horaInicioReserva" class="form-control" required></div>
+                <div class="mb-3"><input type="time" id="horaFinReserva" class="form-control" required></div>
+                <div class="mb-3"><input type="number" id="cantidadReserva" class="form-control"
+                    placeholder="Cantidad de personas" required></div>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+                  <button type="submit" class="btn btn-outline-success fw-bold">Confirmar</button>
+                  <button type="reset" class="btn btn-outline-dark fw-bold">Cancelar</button>
+                </div>
+              </form>
+              <form id="modal-clima-form">
+                <button type="submit" data-bs-toggle="modal" data-bs-target="#climaModal"
+                  class="btn btn-outline-primary d-grid fw-bold gap-2 d-md-flex justify-content-md-end">Obtener datos del
+                  clima</button>
+              </form>
+            </div>
+            <nav aria-label="Page navigation" id="mostrar-reserva-paginado">
+              <ul id="reserva-paginacion" class="pagination justify-content-center"></ul>
+            </nav>
+            <div id=mjeReserva></div>
           </div>
-          <!-- <div class="card-footer py-3 bg-light d-grid gap-2 d-md-flex justify-content-md-end">
-            <form id="modificar-pass-form" class="ms-md-auto">
-              <button type="submit" class="nav-link small text-primary ms-2 text-decoration-none">
-                cambiar contraseña</button>
-            </form>
-          </div>-->
-          <!-- Modificar reserva-->
-          <div id="modificar-reserva" style="display: none;">
-            <form id="reserva-modificar-form">
-              <input type="text" id="mesaIdMod" disabled hidden class="form-control" required>
-              <label for="nroMesaMod">Numero Mesa</label>
-              <div class="mb-3"><input type="number" id="nroMesaMod" disabled class="form-control"
-                  placeholder="Numero Mesa" required>
-              </div>
-              <label for="capacidadMod">Capacidad</label>
-              <div class="mb-3"><input type="number" id="capacidadMod" class="form-control" placeholder="Capacidad"
-                  required>
-              </div>
-              <label for="ubicacionMod">Ubicación</label>
-              <div class="mb-3"><input type="text" id="ubicacionMod" class="form-control" placeholder="Ubicacion"
-                  required>
-              </div>
-              <label for="estadoMod">Estado</label>
-              <div class="mb-3">
-                <select id="estadoMod" class="form-select">
-                  <option value="Disponible" selected>Disponible</option>
-                  <option value="Ocupado">Ocupado</option>
-                  <option value="En reparacion">En reparacion</option>
-                </select>
-              </div>
-              <div class="d-grid gap-2 d-md-flex justify-content-md-center">
-                <button type="submit" class="btn btn-outline-success fw-bold">Confirmar</button>
-                <button type="reset" class="btn btn-outline-dark fw-bold">Cancelar</button>
-              </div>
-            </form>
-          </div>
-          <!-- Crear reserva-->
-          <div id="crear-reserva" style="display: none;">
-            <form id="reserva-crear-form">
-              <label for="nroMesa">Numero Mesa</label>
-              <div class="mb-3"><input type="number" id="nroMesa" class="form-control" placeholder="Numero Mesa"
-                  required>
-              </div>
-              <label for="capacidad">Capacidad</label>
-              <div class="mb-3"><input type="number" id="capacidad" class="form-control" placeholder="Capacidad"
-                  required>
-              </div>
-              <label for="ubicacion">Ubicación</label>
-              <div class="mb-3"><input type="text" id="ubicacion" class="form-control" placeholder="Ubicacion" required>
-              </div>
-              <label for="estado">Estado</label>
-              <div class="mb-3">
-                <select id="estado" class="form-select">
-                  <option value="Disponible" selected>Disponible</option>
-                  <option value="Ocupado">Ocupado</option>
-                  <option value="En reparacion">En reparacion</option>
-                </select>
-              </div>
-              <div class="d-grid gap-2 d-md-flex justify-content-md-center">
-                <button type="submit" class="btn btn-outline-success fw-bold">Confirmar</button>
-                <button type="reset" class="btn btn-outline-dark fw-bold">Cancelar</button>
-              </div>
+          <div class="card-footer py-3" id="btn-agregar-reserva">
+            <form id="login-reserva-form" class="d-grid fw-bold gap-2 d-md-flex justify-content-md-end">
+              <button type="submit" class="btn btn-outline-success fw-bold small">
+                Agregar reserva</button>
             </form>
           </div>
-          <nav aria-label="Page navigation" id="mostrar-mesa-paginado">
-            <ul id="reserva-paginacion" class="pagination justify-content-center"></ul>
-          </nav>
-          <div id=mjeReserva></div>
-        </div>
-        <div class="card-footer py-3" id="btn-agregar-reserva">
-          <form id="login-reserva-form" class="d-grid fw-bold gap-2 d-md-flex justify-content-md-end">
-            <button type="submit" class="btn btn-outline-success fw-bold small">
-              Agregar mesa</button>
-          </form>
         </div>
       </div>
 
       <!-- Seccion de Mis datos -->
-      <div id="usuarios" class="tab-pane fade show active">
+      <div id="usuarios" class="tab-pane fade">
         <h3></h3>
         <!-- Mostrar datos usuario-->
         <div class="card p-3" id="mostrar-usuario">
@@ -326,12 +307,6 @@
               </table>
             </div>
           </div>
-          <!-- <div class="card-footer py-3 bg-light d-grid gap-2 d-md-flex justify-content-md-end">
-            <form id="modificar-pass-form" class="ms-md-auto">
-              <button type="submit" class="nav-link small text-primary ms-2 text-decoration-none">
-                cambiar contraseña</button>
-            </form>
-          </div>-->
           <!-- Modificar mesa-->
           <div id="modificar-mesa" style="display: none;">
             <form id="mesa-modificar-form">

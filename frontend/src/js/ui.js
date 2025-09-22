@@ -3,19 +3,9 @@
 const login_seccion = 'login-seccion';
 const registrar_seccion = 'registrar-seccion';
 const seccionLista = [login_seccion, registrar_seccion, 'nav-seccion', 'nav-tabs-seccion'];
-let currentPage = 1;
-const pageSize = 10;
-
-export const mostrarReserva = (reserva) => {
-  const tbody = document.getElementById('reserva-body');
-  const fila = document.createElement('tr');
-  fila.innerHTML = `
-    <td>${reserva.id}</td>
-    <td>${reserva.nombre || reserva.title}</td>
-    <td>${reserva.detalle || reserva.body}</td>
-  `;
-  tbody.appendChild(fila);
-};
+const ciudadesCentral = ['AREGUÁ', 'CAPIATÁ', 'FERNANDO DE LA MORA', 'GUARAMBARÉ', 'ITÁ', 'ITAUGUÁ',
+  'J. AUGUSTO SALDÍVAR', 'LAMBARÉ', 'LIMPIO', 'LUQUE', 'MARIANO ROQUE ALONSO', 'ÑEMBY',
+  'SAN ANTONIO', 'SAN LORENZO', 'VILLAELISA', 'VILLETA', 'YPACARAI', 'YPANÉ']
 
 // Sección de Usuarios
 export const mostrarUsuario = (usuario) => {
@@ -105,57 +95,167 @@ export const listarMesas = (mesas, rolId, modMesas, delMesas) => {
     mensaje.innerHTML = "Sin datos";
   }
 };
-fechaReserva, horaInicioReserva, horaFinReserva, estadoReserva,
-  cantidadPersonas, fechaSolicitado, idMesa, idUsuario, idAdmin
-export const listarReservas = (reservas, rolId, modMesas, delMesas) => {
-  console.log(reservas);
+
+export const listarReservas = (reservas, isAdmin, actEstadoReserva) => {
+  console.log(typeof isAdmin);
   if (!!reservas && reservas.length > 0) {
+    const thead = document.getElementById('reservas-head');
     const tbody = document.getElementById('reservas-body');
+    thead.innerHTML = "";
     tbody.innerHTML = "";
-    reservas.forEach(reserva => {
-      const fila = document.createElement('tr');
-      fila.className = "text-center";
-      fila.innerHTML =
-        `<td>${reserva.fechaReserva}</td>
-        <td>${reserva.horaInicioReserva}</td>
-        <td>${reserva.horaFinReserva}</td>
+    if (isAdmin == "true") {
+      const cabecera = document.createElement('tr');
+      thead.innerHTML = `<th>Fecha Reserva</th>
+                    <th>Hora Inicio</th>
+                    <th>Hora Fin</th>
+                    <th>Estado</th>
+                    <th>Cantidad</th>
+                    <th>fecha Solicitado</th>
+                    <th>Capacidad mesa</th>
+                    <th>Usuario</th>
+                    <th>Accion</th>`;
+      thead.appendChild(cabecera);
+      reservas.forEach(reserva => {
+        const fila = document.createElement('tr');
+        fila.className = "text-center";
+        fila.innerHTML = `<td>${new Date(reserva.fechaReserva).toLocaleDateString()}</td>
+        <td>${new Date(reserva.horaInicioReserva).toLocaleTimeString()}</td>
+        <td>${new Date(reserva.horaFinReserva).toLocaleTimeString()}</td>
         <td>${reserva.estadoReserva}</td>
         <td>${reserva.cantidadPersonas}</td>
-        <td>${reserva.fechaSolicitado}</td>
-        <td>${reserva.idMesa}</td>
-        <td>${reserva.idUsuario}</td>
-        <td>${reserva.idAdmin}</td>`;
-      // Crear la celda con los botones
-      const tdAcciones = document.createElement('td');
-      const divAcciones = document.createElement('div');
-      // Crear el botón Eliminar
-      const btnEliminar = document.createElement('button');
-      btnEliminar.classList.add('btn', 'btn-outline-danger', 'fw-bold', 'btn-sm');
-      btnEliminar.textContent = 'Rechazar';
-      btnEliminar.onclick = () => delMesas(reserva.id);
-      // Crear el botón Modificar
-      const btnModificar = document.createElement('button');
-      btnModificar.classList.add('btn', 'btn-outline-success', 'fw-bold', 'btn-sm', 'ms-2');
-      btnModificar.textContent = 'Confirmar';
-      btnModificar.onclick = () => modMesas(reserva.id, btnModificar);
+        <td>${new Date(reserva.fechaSolicitado).toLocaleDateString()}</td>
+        <td>${reserva.mesa.capacidad}</td>
+        <td>${reserva.usuario.nombre}</td>`;
 
-      // Agregar los botones a la div
-      divAcciones.appendChild(btnEliminar);
-      divAcciones.appendChild(btnModificar);
+        // Crear la celda con los botones
+        const tdAcciones = document.createElement('td');
+        const divAcciones = document.createElement('div');
+        if (reserva.estadoReserva == 'PENDIENTE') {
+          // Crear el botón Rechazar
+          const btnRechazar = document.createElement('button');
+          btnRechazar.classList.add('btn', 'btn-outline-danger', 'fw-bold', 'btn-sm');
+          btnRechazar.textContent = 'Rechazar';
+          btnRechazar.onclick = () => actEstadoReserva(reserva.id, false);
+          // Crear el botón Confirmar
+          const btnConfirmar = document.createElement('button');
+          btnConfirmar.classList.add('btn', 'btn-outline-success', 'fw-bold', 'btn-sm', 'ms-2');
+          btnConfirmar.textContent = 'Confirmar';
+          btnConfirmar.onclick = () => actEstadoReserva(reserva.id, true);
 
-      // Agregar la div a la celda de acciones
-      tdAcciones.appendChild(divAcciones);
-      fila.appendChild(tdAcciones);
+          // Agregar los botones a la div
+          divAcciones.appendChild(btnRechazar);
+          divAcciones.appendChild(btnConfirmar);
+        }
+        // Agregar la div a la celda de acciones
+        tdAcciones.appendChild(divAcciones);
+        fila.appendChild(tdAcciones);
 
-      tbody.appendChild(fila);
+        tbody.appendChild(fila);
 
-    });
+      });
+    } else {
+      const cabecera = document.createElement('tr');
+      cabecera.className = "text-center";
+      cabecera.innerHTML = `
+                    <th>Fecha Reserva</th>
+                    <th>Hora Inicio</th>
+                    <th>Hora Fin</th>
+                    <th>Estado</th>
+                    <th>Cantidad</th>
+                    <th>fecha Solicitado</th>
+                    <th>Capacidad mesa</th>
+                    <th>Accion</th>`;
+      thead.appendChild(cabecera);
+      reservas.forEach(reserva => {
+        const fila = document.createElement('tr');
+        fila.className = "text-center";
+        fila.innerHTML = `<td>${new Date(reserva.fechaReserva).toLocaleDateString()}</td>
+        <td>${new Date(reserva.horaInicioReserva).toLocaleTimeString()}</td>
+        <td>${new Date(reserva.horaFinReserva).toLocaleTimeString()}</td>
+        <td>${reserva.estadoReserva}</td>
+        <td>${reserva.cantidadPersonas}</td>
+        <td>${new Date(reserva.fechaSolicitado).toLocaleDateString()}</td>
+        <td>${reserva.mesa.capacidad}</td>`;
+
+        // Crear la celda con los botones
+        const tdAcciones = document.createElement('td');
+        const divAcciones = document.createElement('div');
+        if (reserva.estadoReserva == 'PENDIENTE' ||
+          (reserva.estadoReserva == 'CONFIRMADO' &&
+            (new Date(reserva.fechaReserva).toLocaleDateString() >= (new Date()).toLocaleDateString()))) {
+          // Crear el botón Cancelar
+          const btnCancelar = document.createElement('button');
+          btnCancelar.classList.add('btn', 'btn-outline-danger', 'fw-bold', 'btn-sm', 'ms-2');
+          btnCancelar.textContent = 'Cancelar';
+          btnCancelar.onclick = () => actEstadoReserva(reserva.id, false);
+          // Agregar los botones a la div
+          divAcciones.appendChild(btnCancelar);
+          // Agregar la div a la celda de acciones
+          tdAcciones.appendChild(divAcciones);
+        }
+        if (reserva.estadoReserva == 'PENDIENTE') {
+          // Crear el botón Confirmar
+          const btnConfirmar = document.createElement('button');
+          btnConfirmar.classList.add('btn', 'btn-outline-primary', 'fw-bold', 'btn-sm', 'ms-2');
+          btnConfirmar.textContent = 'Modificar';
+          btnConfirmar.onclick = () => actEstadoReserva(reserva.id, true);
+          // Agregar los botones a la div
+          divAcciones.appendChild(btnConfirmar);
+          // Agregar la div a la celda de acciones
+          tdAcciones.appendChild(divAcciones);
+        }
+        fila.appendChild(tdAcciones);
+
+        tbody.appendChild(fila);
+
+      });
+    }
   } else {
     const mensaje = document.getElementById('mjeMesa');
     mensaje.className = "text-center";
     mensaje.innerHTML = "Sin datos";
   }
 };
+
+export const listarCiudadesCentral = () => {
+  const selectElement = document.getElementById('selectCiudades');
+
+  selectElement.innerHTML = "";
+
+  ciudadesCentral.forEach(ciudad => {
+    const option = document.createElement('option');
+    option.value = ciudad;
+    option.textContent = ciudad;
+
+    selectElement.appendChild(option);
+  });
+};
+
+export const listarMesasSelect = (mesas) => {
+  const selectElement = document.getElementById('mesaCrearReserva');
+
+  selectElement.innerHTML = "";
+
+  mesas.data.forEach(mesa => {
+    const option = document.createElement('option');
+    option.value = mesa.id;
+    option.textContent = `Nro mesa: ${mesa.numeroMesa} - Capacidad: ${mesa.capacidad} - Ubicacion: ${mesa.ubicacion}`;
+
+    selectElement.appendChild(option);
+  });
+};
+
+export const obtenerReservaCreacion = (userId) => {
+  const idMesa = document.getElementById('mesaCrearReserva').value;
+  const fechaReserva = document.getElementById('fechaReserva').value;
+  const horaInicioReserva = document.getElementById('horaInicioReserva').value;
+  const horaFinReserva = document.getElementById('horaFinReserva').value;
+  const cantidadPersonas = document.getElementById('cantidadReserva').value;
+  const idUsuario = userId;
+
+  return {fechaReserva, horaInicioReserva, horaFinReserva, cantidadPersonas,idMesa, idUsuario };
+};
+
 export const obtenerMesaCreacion = () => {
   const numeroMesa = document.getElementById('nroMesa').value;
   const capacidad = document.getElementById('capacidad').value;
@@ -196,7 +296,7 @@ export const mostrarModificarMesa = (Id, mesa) => {
   document.getElementById('modificar-mesa').style.display = 'block';
 };
 
-export const mesaSeccion = (usuario) => {
+export const mesaSeccion = () => {
   document.getElementById('mostrar-mesas').style.display = 'none';
   document.getElementById('mostrar-mesa-paginado').style.display = 'none';
   document.getElementById('btn-agregar-mesa').style.display = 'none';
@@ -204,20 +304,56 @@ export const mesaSeccion = (usuario) => {
   document.getElementById('crear-mesa').style.display = 'block';
 };
 
+export const reservaCrearSeccion = () => {
+  document.getElementById('mostrar-reserva').style.display = 'none';
+  document.getElementById('mostrar-reserva-paginado').style.display = 'none';
+  document.getElementById('btn-agregar-reserva').style.display = 'none';
+  document.getElementById('modificar-reserva').style.display = 'none';
+  document.getElementById('crear-reserva').style.display = 'block';
+};
+
+export const cancelarReserva = () => {
+  document.getElementById('mostrar-reserva').style.display = 'block';
+  document.getElementById('mostrar-reserva-paginado').style.display = 'block';
+  document.getElementById('btn-agregar-reserva').style.display = 'block';
+  document.getElementById('modificar-reserva').style.display = 'none';
+  document.getElementById('crear-reserva').style.display = 'none';
+};
+
 // Enlace externo 
+export const getDatosClima = () => {
+  let ciudad = document.getElementById("selectCiudades").value;
+  let fecha = document.getElementById("fechaClima").value;
+  return { ciudad, fecha };
+};
+
 export const mostrarClima = (data) => {
-  document.getElementById("span-clima").innerText =
-    `fecha: ${data.date} 📅,
-      ubicacion: ${data.location} 📍,
-      Precipitacion: ${data.precipitation} % 🌧️,
-      temperatura máxima: ${data.tmax} ☀️,
-      temperatura mínima: ${data.tmin} ❄️,
+  document.getElementById("span-clima").innerHTML =
+    `<span><hr>
+    <b>Fecha:</b> ${data.date} 📅<br>
+    <b>Ubicacion:</b> ${data.location} 📍<br>
+    <b>Precipitacion:</b> ${data.precipitation} % 🌧️<br>
+    <b>Temperatura Máxima:</b> ${data.tmax} ☀️<br>
+    <b>Temperatura Mínima:</b> ${data.tmin} ❄️</span>
     `;
 };
 
-export const ocultarLoading = () => {
-  const loading = document.getElementById('loading');
-  if (loading) loading.style.display = 'none';
+export const limpiarDatosClima = () => {
+  listarCiudadesCentral();
+  document.getElementById("fechaClima").value = "";
+  document.getElementById("span-clima").innerHTML = "";
+};
+
+export const mostrarMjeClima = (mje) => {
+  const div = document.getElementById("span-clima");
+  div.innerHTML = "";
+  const span = document.createElement('span');
+  span.className = 'text-danger';
+  span.innerText = mje;
+  div.appendChild(span);
+  setTimeout(() => {
+    div.innerHTML = "";
+  }, 3500);
 };
 
 export const inicioSeccion = () => {
@@ -288,8 +424,8 @@ export const mostrarBlockUI = () => {
   blockUI.classList.remove('d-none');
   setTimeout(() => {// Ejemplo: Ocultar después de 5 segundos
     blockUI.classList.add('d-none');
-  }, 5000);
-}
+  }, 2500);
+};
 
 //Paginacion
 

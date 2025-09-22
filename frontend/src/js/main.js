@@ -1,12 +1,14 @@
 import {
-  login, getReservas, crearReserva, obtenerClima, crearUsuario, obtenerUsuario, modificarUsuario, eliminarUsuario,
-  obtenerAllMesas, eliminarMesa, obtenerMesa, modificarMesa, crearMesa
+  login, crearReserva, obtenerClima, crearUsuario, obtenerUsuario, modificarUsuario, eliminarUsuario,
+  obtenerAllMesas, eliminarMesa, obtenerMesa, modificarMesa, crearMesa, getAllReservas, estadoReserva
 } from './services.js';
 import {
-  mostrarReserva, mostrarBlockUI, loginSeccion, inicioSeccion, ocultarLoading, mostrarModificarUsuario,
+  mostrarBlockUI, loginSeccion, inicioSeccion, mostrarModificarUsuario,
   logoutSeccion, mostrarAlerta, registrarseSeccion, mostrarUsuario, cancelarModificarUsuario, mostrarClima,
   obtenerRegistroCreacion, obtenerRegistroModificado, listarMesas, mostrarModificarMesa, obtenerMesaModificada,
-  cancelarMesa, mesaSeccion, renderPagination, obtenerMesaCreacion
+  cancelarMesa, mesaSeccion, renderPagination, obtenerMesaCreacion, listarReservas, listarCiudadesCentral,
+  getDatosClima, mostrarMjeClima, limpiarDatosClima, listarMesasSelect, reservaCrearSeccion, cancelarReserva,
+  obtenerReservaCreacion
 } from './ui.js';
 import Config from './config.js';
 
@@ -26,15 +28,18 @@ const mesaModificarForm = document.getElementById('mesa-modificar-form');
 const mesaCrearForm = document.getElementById('mesa-crear-form');
 const loginRegistrarseForm = document.getElementById('login-registrarse-form');
 const logoutRegistrarseForm = document.getElementById('logout-registrarse-form');
-const reservaForm = document.getElementById('reserva-form');
+const modalClima = document.getElementById('modal-clima-form');
 const mesaPaginacion = document.getElementById('mesa-paginacion');
 const loginMesaForm = document.getElementById('login-mesa-form');
 const logoutMesaForm = document.getElementById('logout-registrarse-form');
+const consultarClimaBtn = document.getElementById('consultar-clima-btn');
+const climaModal = document.getElementById('climaModal');
+const reservaCrearForm = document.getElementById('reserva-crear-form');
+const loginReservaForm = document.getElementById('login-reserva-form');
 
 const cargarUsuario = async () => {
   try {
     const usuario = await obtenerUsuario();
-    ocultarLoading();
     mostrarUsuario(usuario);
   } catch (err) {
     console.error('Error al cargar usuario:', err);
@@ -45,9 +50,8 @@ const cargarUsuario = async () => {
 const cargarMesas = async (pag) => {
   try {
     const pagina = !!pag ? pag : 1;
-    const mesas = await obtenerAllMesas(pagina, 5);
+    const mesas = await obtenerAllMesas(true, pagina, 5);
     console.log(mesas);
-    ocultarLoading();
     // Cargar la primera página al iniciar
     renderPagination(mesas.paginacion, "mesa-paginacion", changeMesaPage);
     listarMesas(mesas.data, Config.getUserRolId(), modMesas, delMesas);
@@ -57,23 +61,27 @@ const cargarMesas = async (pag) => {
   }
 };
 
-const cargarReservas = async () => {
+const cargarReservas = async (pag) => {
   try {
-    const reservas = await getReservas();
-    ocultarLoading();
-    reservas.forEach(mostrarReserva);
+    const pagina = !!pag ? pag : 1;
+    const reservas = await getAllReservas(pagina, 5);
+    console.log(reservas);
+    // Cargar la primera página al iniciar
+    renderPagination(reservas.paginacion, "reserva-paginacion", changeMesaPage);
+    listarReservas(reservas.data, Config.isAdmin(), actEstadoReserva);
   } catch (err) {
-    console.error('Error al cargar reservas:', err);
-    mostrarAlerta('error', Error + 'Error al cargar reservas.');
+    console.error('Error al listar mesas:', err);
+    mostrarAlerta('error', Error + 'Error al listar mesas');
   }
 };
 
 export const modMesas = async (mesaId, ts) => {
   try {
     const mesa = await obtenerMesa(mesaId);
+    cargarMesas();
     mostrarModificarMesa(mesaId, mesa);
   } catch (err) {
-    console.error('Error al eliminar  mesa:', err);
+    console.error('Error al modificar  mesa:', err);
     mostrarAlerta('error', Error + 'Erro al eliminar mesa');
   }
 };
@@ -84,16 +92,67 @@ const delMesas = async (mesaId) => {
     if (confirmacion) {
       const mesa = await eliminarMesa(mesaId);
       mostrarAlerta('success', Exito + 'La mesa ha sido eliminada.');
-      cargarMesas();
     } else {
-      cargarMesas();
       alert("La eliminación ha sido cancelada.");
     }
   } catch (err) {
     console.error('Error al eliminar  mesa:', err);
     mostrarAlerta('error', Error + 'Erro al eliminar mesa');
   }
+  cargarMesas();
 };
+
+const actEstadoReserva = async (reservaId, estado) => {
+  try {
+    if (estado) {
+      let confirmacion = confirm("¿Estás seguro de que quieres confirmar esta reserva?");
+      if (confirmacion) {
+        const reserva = await estadoReserva(reservaId, 'CONFIRMADO');
+        mostrarAlerta('success', Exito + 'La reserva ha sido confirmada.');
+      }
+    } else {
+      let confirmacion = confirm("¿Estás seguro de que quieres rechazr esta reserva?");
+      if (confirmacion) {
+        const reserva = await estadoReserva(reservaId, 'RECHAZADO');
+        mostrarAlerta('success', Exito + 'La reserva ha sido rechazada.');
+      }
+    }
+  } catch (err) {
+    console.error('Error al modificar estado de reserva:', err);
+    mostrarAlerta('error', Error + 'Erro al modificar estado de reserva');
+  }
+  cargarReservas();
+};
+
+loginReservaForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  try {
+    const mesas = await obtenerAllMesas(false);
+    listarMesasSelect(mesas);
+  } catch (err) {
+    mostrarAlerta('error', Error + 'Erro al obtener mesas');
+  }
+  reservaCrearSeccion();
+});
+
+reservaCrearForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const registro = obtenerReservaCreacion(Config.getUserId());
+  try {
+    const response = await crearReserva(registro);
+    cancelarReserva();
+    mostrarAlerta('success', Exito + "Reserva creada correctamente");
+    cargarReservas();
+  } catch (err) {
+    mostrarAlerta('error', Error + err);
+    console.error('Error al crear reserva:', err);
+  }
+});
+
+reservaCrearForm.addEventListener('reset', async (e) => {
+  e.preventDefault();
+  cancelarReserva();
+});
 
 logoutForm.addEventListener('submit', async (e) => {
   e.preventDefault();
@@ -132,7 +191,6 @@ usuarioForm.addEventListener('submit', async (e) => {
 });
 
 eliminarCuenta.addEventListener('click', async (e) => {
-  console.error("entra en reset");
   let confirmacion = window.confirm("¿Estás seguro de que quieres eliminar eliminar tu cuenta?");
   if (confirmacion) {
     eliminarUsuario();
@@ -234,23 +292,42 @@ mesaCrearForm.addEventListener('reset', async (e) => {
   cancelarMesa();
 });
 
-reservaForm.addEventListener('submit', async (e) => {
+modalClima.addEventListener('submit', async (e) => {
   e.preventDefault();
-
   try {
-    const registro = await obtenerClima();
-    mostrarClima(registro.data);
+    listarCiudadesCentral();
   } catch (err) {
     alert('Error al crear la reserva.');
     console.error(err);
   }
 });
 
+consultarClimaBtn.addEventListener('click', async (e) => {
+  let { ciudad, fecha } = getDatosClima();
+  if (!!ciudad && !!fecha) {
+    try {
+      listarCiudadesCentral();
+      mostrarBlockUI();
+      const registro = await obtenerClima(ciudad, fecha);
+      mostrarClima(registro.data);
+    } catch (err) {
+      mostrarMjeClima(err);
+      console.error(err);
+    }
+  } else {
+    mostrarMjeClima(`Los campos ciudad y fecha son requeridos`);
+  }
+});
+
+climaModal.addEventListener('hidden.bs.modal', event => {
+  limpiarDatosClima();
+});
+
 if (Config.isLoggedIn()) {
   //inicioSecciones();
   cargarUsuario();
   cargarMesas();
-  //cargarReservas();
+  cargarReservas();
 } else {
   logoutSeccion();
 }

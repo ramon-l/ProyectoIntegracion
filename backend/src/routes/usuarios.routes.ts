@@ -6,7 +6,7 @@ const router = Router();
 
 router.get('/usuarios', verifyToken, getAllUsuarios);
 router.get('/usuarios/:id', verifyToken, getUsuarioById);
-router.post('/usuarios', createUsuarios);
+router.post('/usuarios',verifyToken, createUsuarios);
 router.put('/usuarios/:id', verifyToken, updateUsuarios);
 router.delete('/usuarios/:id', verifyToken, deleteUsuarios);
 

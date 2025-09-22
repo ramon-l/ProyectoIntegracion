@@ -11,8 +11,15 @@ export const login = async (email, password) => {
 };
 
 // Reservas
-export const getReservas = async () => {
-  const response = await axios.get(Config.RESERVAS_URL, {
+export const getAllReservas = async (currentpage,pageSize) => {
+  const response = await axios.get(Config.RESERVAS_URL+`?page=${currentpage}&pageSize=${pageSize}`, {
+    headers: Config.getAuthHeaders()
+  });
+  return response.data;
+};
+
+export const getAllReservasByUser = async (currentpage,pageSize) => {
+  const response = await axios.get(Config.RESERVAS_URL+"/"+Config.getUserId()+`?page=${currentpage}&pageSize=${pageSize}`, {
     headers: Config.getAuthHeaders()
   });
   return response.data;
@@ -20,6 +27,13 @@ export const getReservas = async () => {
 
 export const crearReserva = async (reserva) => {
   const response = await axios.post(Config.RESERVAS_URL, reserva, {
+    headers: Config.getAuthHeaders()
+  });
+  return response.data;
+};
+
+export const estadoReserva = async (reservaId,estado) => {
+  const response = await axios.put(Config.RESERVAS_URL+`?id=${reservaId}&estado=${estado}`, {
     headers: Config.getAuthHeaders()
   });
   return response.data;
@@ -62,8 +76,18 @@ export const crearMesa = async (mesa) => {
   return response.data;
 };
 
-export const obtenerAllMesas = async (currentpage,pageSize) => {
-  const response = await axios.get(Config.MESAS_URL+`?page=${currentpage}&pageSize=${pageSize}`, {
+export const obtenerAllMesas = async (esPaginado,currentpage,pageSize) => {
+  console.log(esPaginado,currentpage,pageSize);
+  console.log(typeof esPaginado);
+  const paginado = !esPaginado?`?esPaginado=${esPaginado}`:`?esPaginado=${esPaginado}&page=${currentpage}&pageSize=${pageSize}`;
+  const response = await axios.get(Config.MESAS_URL+ paginado, {
+    headers: Config.getAuthHeaders()
+  });
+  return response.data;
+};
+
+export const listarAllMesas = async () => {
+  const response = await axios.get(Config.MESAS_URL, {
     headers: Config.getAuthHeaders()
   });
   return response.data;
@@ -93,8 +117,8 @@ export const eliminarMesa = async (mesaId) => {
 };
 
 //Enlace externo
-export const obtenerClima = async () => {
-  const response = await axios.get(Config.CLIMA_URL +"?ciudad=ASUNCION&fecha='2025-09-17'", {
+export const obtenerClima = async (ciudad,fecha) => {
+  const response = await axios.get(Config.CLIMA_URL +`?ciudad=${ciudad}&fecha=${fecha}`, {
     headers: Config.getAuthHeaders()
   });
   return response.data;

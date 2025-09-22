@@ -28,3 +28,5 @@ app.listen(3000, () => {
      console.log(`Servidor en http://localhost:${PORT}`);
 }
 )
+
+export default app;
