@@ -1,9 +1,10 @@
 import { Router } from "express";
 import { getAllMesas, createMesas, updateMesas, deleteMesas, getMesaById } from "../controllers/mesas.controllers";
+import { verifyToken } from "../middlewares/auth";
 
 const router = Router();
 
-router.get('/mesas', getAllMesas);
+router.get('/mesas', verifyToken, getAllMesas);
 router.get('/mesas/:id', getMesaById);
 router.post('/mesas', createMesas);
 router.put('/mesas/:id', updateMesas);
