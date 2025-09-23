@@ -5,9 +5,9 @@ import { verifyToken } from "../middlewares/auth";
 const router = Router();
 
 router.get('/mesas', verifyToken, getAllMesas);
-router.get('/mesas/:id', getMesaById);
-router.post('/mesas', createMesas);
-router.put('/mesas/:id', updateMesas);
-router.delete('/mesas/:id', deleteMesas);
+router.get('/mesas/:id',verifyToken, getMesaById);
+router.post('/mesas',verifyToken, createMesas);
+router.put('/mesas/:id',verifyToken, updateMesas);
+router.delete('/mesas/:id',verifyToken, deleteMesas);
 
 export default router;

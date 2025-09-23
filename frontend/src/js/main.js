@@ -8,7 +8,7 @@ import {
   obtenerRegistroCreacion, obtenerRegistroModificado, listarMesas, mostrarModificarMesa, obtenerMesaModificada,
   cancelarMesa, mesaSeccion, renderPagination, obtenerMesaCreacion, listarReservas, listarCiudadesCentral,
   getDatosClima, mostrarMjeClima, limpiarDatosClima, listarMesasSelect, reservaCrearSeccion, cancelarReserva,
-  obtenerReservaCreacion
+  obtenerReservaCreacion, mostrarMesaNav
 } from './ui.js';
 import Config from './config.js';
 
@@ -51,7 +51,6 @@ const cargarMesas = async (pag) => {
   try {
     const pagina = !!pag ? pag : 1;
     const mesas = await obtenerAllMesas(true, pagina, 5);
-    console.log(mesas);
     // Cargar la primera página al iniciar
     renderPagination(mesas.paginacion, "mesa-paginacion", changeMesaPage);
     listarMesas(mesas.data, Config.getUserRolId(), modMesas, delMesas);
@@ -65,9 +64,8 @@ const cargarReservas = async (pag) => {
   try {
     const pagina = !!pag ? pag : 1;
     const reservas = await getAllReservas(pagina, 5);
-    console.log(reservas);
     // Cargar la primera página al iniciar
-    renderPagination(reservas.paginacion, "reserva-paginacion", changeMesaPage);
+    renderPagination(reservas.paginacion, "reserva-paginacion", changeReservaPage);
     listarReservas(reservas.data, Config.isAdmin(), actEstadoReserva);
   } catch (err) {
     console.error('Error al listar mesas:', err);
@@ -104,17 +102,23 @@ const delMesas = async (mesaId) => {
 
 const actEstadoReserva = async (reservaId, estado) => {
   try {
-    if (estado) {
+    if ('CONFIRMADO' === estado) {
       let confirmacion = confirm("¿Estás seguro de que quieres confirmar esta reserva?");
       if (confirmacion) {
-        const reserva = await estadoReserva(reservaId, 'CONFIRMADO');
+        const reserva = await estadoReserva(reservaId, estado);
         mostrarAlerta('success', Exito + 'La reserva ha sido confirmada.');
       }
-    } else {
-      let confirmacion = confirm("¿Estás seguro de que quieres rechazr esta reserva?");
+    } else if ('RECHAZADO' === estado) {
+      let confirmacion = confirm("¿Estás seguro de que quieres rechazar esta reserva?");
       if (confirmacion) {
-        const reserva = await estadoReserva(reservaId, 'RECHAZADO');
+        const reserva = await estadoReserva(reservaId, estado);
         mostrarAlerta('success', Exito + 'La reserva ha sido rechazada.');
+      }
+    } else if ('CANCELADO' === estado) {
+      let confirmacion = confirm("¿Estás seguro de que quieres cancelar esta reserva?");
+      if (confirmacion) {
+        const reserva = await estadoReserva(reservaId, estado);
+        mostrarAlerta('success', Exito + 'La reserva ha sido cancelada.');
       }
     }
   } catch (err) {
@@ -173,8 +177,15 @@ loginForm.addEventListener('submit', async (e) => {
       Config.saveToken(data.token);
       loginSeccion();
       cargarUsuario();
-      cargarMesas();
-      // cargarReservas();
+      console.log("isAdmin después de login: ");
+      console.log(Config.isAdmin(), typeof Config.isAdmin());
+      if (Config.isAdmin() == "true" || Config.isAdmin() === true) {
+        mostrarMesaNav(true);
+        cargarMesas();
+      } else {
+        mostrarMesaNav(false);
+      }
+      cargarReservas();
     } else {
       const errorText = await response.json();
       mostrarAlerta('error', Error + errorText.error);
@@ -326,7 +337,14 @@ climaModal.addEventListener('hidden.bs.modal', event => {
 if (Config.isLoggedIn()) {
   //inicioSecciones();
   cargarUsuario();
-  cargarMesas();
+        console.log("isAdmin después de login: ");
+      console.log(Config.isAdmin());
+  if (Config.isAdmin() == "true" || Config.isAdmin() === true) {
+    mostrarMesaNav(true);
+    cargarMesas();
+  } else {
+    mostrarMesaNav(false);
+  }
   cargarReservas();
 } else {
   logoutSeccion();
@@ -342,4 +360,8 @@ document.querySelectorAll('.alert .btn-close').forEach(btn => {
 
 const changeMesaPage = async (pagina) => {
   const mesas = await cargarMesas(pagina);
+};
+
+const changeReservaPage = async (pagina) => {
+  const mesas = await cargarReservas(pagina);
 };

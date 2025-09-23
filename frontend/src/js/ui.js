@@ -30,6 +30,23 @@ export const cancelarModificarUsuario = (usuario) => {
   document.getElementById('modificar-usuario').style.display = 'none';
 };
 
+export const mostrarMesaNav = (isAdmin) => {
+  console.log("isAdmin en mostrarMesaNav: ");
+  console.log(isAdmin);
+  if (isAdmin == "true" || isAdmin === true) {
+    document.getElementById('nav-item-mesa').style.display = 'block';
+    cancelarMesa();
+  } else {
+    document.getElementById('nav-item-mesa').style.display = 'none';
+    document.getElementById('mostrar-mesas').style.display = 'block';
+    document.getElementById('mostrar-mesa-paginado').style.display = 'block';
+    document.getElementById('btn-agregar-mesa').style.display = 'block';
+    document.getElementById('modificar-mesa').style.display = 'none';
+    document.getElementById('crear-mesa').style.display = 'none';
+  };
+};
+
+// Sección de Registro
 export const obtenerRegistroCreacion = () => {
   const nombre = document.getElementById('nombreRegistro').value;
   const apellido = document.getElementById('apellidoRegistro').value;
@@ -52,7 +69,6 @@ export const obtenerRegistroModificado = () => {
 
 //Mesas
 export const listarMesas = (mesas, rolId, modMesas, delMesas) => {
-  console.log(mesas);
   if (!!mesas && mesas.length > 0) {
     const tbody = document.getElementById('mesas-body');
     tbody.innerHTML = "";
@@ -97,13 +113,12 @@ export const listarMesas = (mesas, rolId, modMesas, delMesas) => {
 };
 
 export const listarReservas = (reservas, isAdmin, actEstadoReserva) => {
-  console.log(typeof isAdmin);
   if (!!reservas && reservas.length > 0) {
     const thead = document.getElementById('reservas-head');
     const tbody = document.getElementById('reservas-body');
     thead.innerHTML = "";
     tbody.innerHTML = "";
-    if (isAdmin == "true") {
+    if (isAdmin == "true" || isAdmin === true) {
       const cabecera = document.createElement('tr');
       thead.innerHTML = `<th>Fecha Reserva</th>
                     <th>Hora Inicio</th>
@@ -119,8 +134,8 @@ export const listarReservas = (reservas, isAdmin, actEstadoReserva) => {
         const fila = document.createElement('tr');
         fila.className = "text-center";
         fila.innerHTML = `<td>${new Date(reserva.fechaReserva).toLocaleDateString()}</td>
-        <td>${new Date(reserva.horaInicioReserva).toLocaleTimeString()}</td>
-        <td>${new Date(reserva.horaFinReserva).toLocaleTimeString()}</td>
+        <td>${formatearHoraHHMM(reserva.horaInicioReserva)}</td>
+        <td>${formatearHoraHHMM(reserva.horaFinReserva)}</td>
         <td>${reserva.estadoReserva}</td>
         <td>${reserva.cantidadPersonas}</td>
         <td>${new Date(reserva.fechaSolicitado).toLocaleDateString()}</td>
@@ -135,12 +150,12 @@ export const listarReservas = (reservas, isAdmin, actEstadoReserva) => {
           const btnRechazar = document.createElement('button');
           btnRechazar.classList.add('btn', 'btn-outline-danger', 'fw-bold', 'btn-sm');
           btnRechazar.textContent = 'Rechazar';
-          btnRechazar.onclick = () => actEstadoReserva(reserva.id, false);
+          btnRechazar.onclick = () => actEstadoReserva(reserva.id, 'RECHAZADO');
           // Crear el botón Confirmar
           const btnConfirmar = document.createElement('button');
           btnConfirmar.classList.add('btn', 'btn-outline-success', 'fw-bold', 'btn-sm', 'ms-2');
           btnConfirmar.textContent = 'Confirmar';
-          btnConfirmar.onclick = () => actEstadoReserva(reserva.id, true);
+          btnConfirmar.onclick = () => actEstadoReserva(reserva.id, 'CONFIRMADO');
 
           // Agregar los botones a la div
           divAcciones.appendChild(btnRechazar);
@@ -170,8 +185,8 @@ export const listarReservas = (reservas, isAdmin, actEstadoReserva) => {
         const fila = document.createElement('tr');
         fila.className = "text-center";
         fila.innerHTML = `<td>${new Date(reserva.fechaReserva).toLocaleDateString()}</td>
-        <td>${new Date(reserva.horaInicioReserva).toLocaleTimeString()}</td>
-        <td>${new Date(reserva.horaFinReserva).toLocaleTimeString()}</td>
+        <td>${formatearHoraHHMM(reserva.horaInicioReserva)}</td>
+        <td>${formatearHoraHHMM(reserva.horaFinReserva)}</td>
         <td>${reserva.estadoReserva}</td>
         <td>${reserva.cantidadPersonas}</td>
         <td>${new Date(reserva.fechaSolicitado).toLocaleDateString()}</td>
@@ -187,7 +202,7 @@ export const listarReservas = (reservas, isAdmin, actEstadoReserva) => {
           const btnCancelar = document.createElement('button');
           btnCancelar.classList.add('btn', 'btn-outline-danger', 'fw-bold', 'btn-sm', 'ms-2');
           btnCancelar.textContent = 'Cancelar';
-          btnCancelar.onclick = () => actEstadoReserva(reserva.id, false);
+          btnCancelar.onclick = () => actEstadoReserva(reserva.id, 'CANCELADO');
           // Agregar los botones a la div
           divAcciones.appendChild(btnCancelar);
           // Agregar la div a la celda de acciones
@@ -196,7 +211,7 @@ export const listarReservas = (reservas, isAdmin, actEstadoReserva) => {
         if (reserva.estadoReserva == 'PENDIENTE') {
           // Crear el botón Confirmar
           const btnConfirmar = document.createElement('button');
-          btnConfirmar.classList.add('btn', 'btn-outline-primary', 'fw-bold', 'btn-sm', 'ms-2');
+          btnConfirmar.classList.add('btn', 'btn-outline-primary', 'fw-bold', 'btn-sm', 'ms-2', 'disabled');
           btnConfirmar.textContent = 'Modificar';
           btnConfirmar.onclick = () => actEstadoReserva(reserva.id, true);
           // Agregar los botones a la div
@@ -216,6 +231,16 @@ export const listarReservas = (reservas, isAdmin, actEstadoReserva) => {
     mensaje.innerHTML = "Sin datos";
   }
 };
+
+function formatearHoraHHMM(tiempoStr) {
+  const partes = tiempoStr.split(':'); // Divide la cadena en [horas, minutos, segundos]
+  if (partes.length === 3) {
+    const horas = partes[0];
+    const minutos = partes[1];
+    return `${horas}:${minutos}`;
+  }
+  return tiempoStr; // Devuelve la cadena original si no tiene el formato esperado
+}
 
 export const listarCiudadesCentral = () => {
   const selectElement = document.getElementById('selectCiudades');
@@ -253,7 +278,7 @@ export const obtenerReservaCreacion = (userId) => {
   const cantidadPersonas = document.getElementById('cantidadReserva').value;
   const idUsuario = userId;
 
-  return {fechaReserva, horaInicioReserva, horaFinReserva, cantidadPersonas,idMesa, idUsuario };
+  return { fechaReserva, horaInicioReserva, horaFinReserva, cantidadPersonas, idMesa, idUsuario };
 };
 
 export const obtenerMesaCreacion = () => {
